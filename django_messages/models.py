@@ -19,13 +19,13 @@ class MessageManager(models.Manager):
         Returns all conversations user has started or received by from different users and are not
         marked as deleted.
         """
-        return self.filter(
+        return (self.filter(
             recipient=user,
             recipient_deleted_at__isnull=True,
         ) | self.filter(
             sender=user,
             sender_deleted_at__isnull=True,
-        ).values('recipient', 'sender').distinct()
+        )).values('recipient', 'sender').distinct()
 
     def inbox_for(self, user):
         """
