@@ -31,8 +31,9 @@ def inbox(request, template_name='django_messages/inbox.html'):
         ``template_name``: name of the template to use.
     """
     message_list = Message.objects.inbox_for(request.user)
+    message_list.values('recipient', 'sender').distinct().values('recipient')
     return render(request, template_name, {
-        'message_list': message_list,
+        'message_list': message_list.values('recipient', 'sender').distinct().values('recipient')
     })
 
 @login_required
