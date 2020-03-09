@@ -15,6 +15,7 @@ from django_messages.models import Message
 from django_messages.forms import ComposeForm
 from django_messages.utils import format_quote, get_user_model, get_username_field
 from django.core import serializers
+from django.http import HttpResponse
 
 User = get_user_model()
 
