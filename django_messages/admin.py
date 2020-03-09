@@ -32,7 +32,7 @@ class MessageAdminForm(forms.ModelForm):
 
     class Meta:
         model = Message
-        fields = ('sender', 'recipient', 'group', 'parent_msg', 'subject',
+        fields = ('sender', 'recipient', 'group', 'parent_msg',
                 'body', 'sent_at', 'read_at', 'replied_at', 'sender_deleted_at',
                 'recipient_deleted_at')
 
@@ -48,7 +48,6 @@ class MessageAdmin(admin.ModelAdmin):
         (_('Message'), {
             'fields': (
                 'parent_msg',
-                'subject', 'body',
             ),
             'classes': ('monospace' ),
         }),
@@ -60,9 +59,9 @@ class MessageAdmin(admin.ModelAdmin):
             'classes': ('collapse', 'wide'),
         }),
     )
-    list_display = ('subject', 'sender', 'recipient', 'sent_at', 'read_at')
+    list_display = ('sender', 'recipient', 'sent_at', 'read_at')
     list_filter = ('sent_at', 'sender', 'recipient')
-    search_fields = ('subject', 'body')
+    search_fields = ('body')
     raw_id_fields = ('sender', 'recipient', 'parent_msg')
 
     def save_model(self, request, obj, form, change):

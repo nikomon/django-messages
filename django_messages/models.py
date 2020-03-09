@@ -21,6 +21,7 @@ class MessageManager(models.Manager):
         """
         return self.filter(
             recipient=user,
+            sender=user,
             recipient_deleted_at__isnull=True,
         )
 
@@ -53,7 +54,6 @@ class Message(models.Model):
     """
     A private message from user to user
     """
-    subject = models.CharField(_("Subject"), max_length=140)
     body = models.TextField(_("Body"))
     sender = models.ForeignKey(AUTH_USER_MODEL, related_name='sent_messages', verbose_name=_("Sender"), on_delete=models.PROTECT)
     recipient = models.ForeignKey(AUTH_USER_MODEL, related_name='received_messages', null=True, blank=True, verbose_name=_("Recipient"), on_delete=models.SET_NULL)
@@ -79,7 +79,7 @@ class Message(models.Model):
         return False
 
     def __str__(self):
-        return self.subject
+        return self.body
 
     def get_absolute_url(self):
         return reverse('messages_detail', args=[self.id])

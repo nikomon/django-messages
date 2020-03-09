@@ -12,7 +12,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.template import Template, Context
 from django_messages.forms import ComposeForm
 from django_messages.models import Message
-from django_messages.utils import format_subject, format_quote
+from django_messages.utils import format_quote
 from django_messages.context_processors import inbox
 
 from .utils import get_user_model
@@ -27,13 +27,12 @@ class SendTestCase(TestCase):
         self.user2 = User.objects.create_user(
             'user2', 'user2@example.com', '123456')
         self.msg1 = Message(sender=self.user1, recipient=self.user2,
-                            subject='Subject Text', body='Body Text')
+                            , body='Body Text')
         self.msg1.save()
 
     def testBasic(self):
         self.assertEqual(self.msg1.sender, self.user1)
         self.assertEqual(self.msg1.recipient, self.user2)
-        self.assertEqual(self.msg1.subject, 'Subject Text')
         self.assertEqual(self.msg1.body, 'Body Text')
         self.assertEqual(self.user1.sent_messages.count(), 1)
         self.assertEqual(self.user1.received_messages.count(), 0)
@@ -48,9 +47,9 @@ class DeleteTestCase(TestCase):
         self.user2 = User.objects.create_user(
             'user4', 'user4@example.com', '123456')
         self.msg1 = Message(sender=self.user1, recipient=self.user2,
-                            subject='Subject Text 1', body='Body Text 1')
+                            , body='Body Text 1')
         self.msg2 = Message(sender=self.user1, recipient=self.user2,
-                            subject='Subject Text 2', body='Body Text 2')
+                            , body='Body Text 2')
         self.msg1.sender_deleted_at = timezone.now()
         self.msg2.recipient_deleted_at = timezone.now()
         self.msg1.save()
@@ -58,15 +57,8 @@ class DeleteTestCase(TestCase):
 
     def testBasic(self):
         self.assertEqual(Message.objects.outbox_for(self.user1).count(), 1)
-        self.assertEqual(
-            Message.objects.outbox_for(self.user1)[0].subject,
-            'Subject Text 2'
-        )
         self.assertEqual(Message.objects.inbox_for(self.user2).count(), 1)
-        self.assertEqual(
-            Message.objects.inbox_for(self.user2)[0].subject,
-            'Subject Text 1'
-        )
+
         #undelete
         self.msg1.sender_deleted_at = None
         self.msg2.recipient_deleted_at = None
@@ -85,8 +77,7 @@ class IntegrationTestCase(TestCase):
                     'email': 'user_1@example.com'},
                    {'username': 'user_2', 'password': '123456',
                     'email': 'user_2@example.com'}]
-    T_MESSAGE_DATA = [{'subject': 'Test Subject 1',
-                       'body': 'Lorem ipsum\ndolor sit amet\n\nconsectur.'}]
+    T_MESSAGE_DATA = [{'body': 'Lorem ipsum\ndolor sit amet\n\nconsectur.'}]
 
     def setUp(self):
         """ create 2 users and a test-client logged in as user_1 """
@@ -130,7 +121,6 @@ class IntegrationTestCase(TestCase):
             reverse('messages_compose'),
             {
                 'recipient': self.T_USER_DATA[1]['username'],
-                'subject': self.T_MESSAGE_DATA[0]['subject'],
                 'body': self.T_MESSAGE_DATA[0]['body']
             })
         # successfull sending should redirect to inbox
@@ -150,7 +140,6 @@ class IntegrationTestCase(TestCase):
         # create a message for this test
         Message.objects.create(sender=self.user_1,
                                recipient=self.user_2,
-                               subject=self.T_MESSAGE_DATA[0]['subject'],
                                body=self.T_MESSAGE_DATA[0]['body'])
         # log the user_2 in and check the inbox
         self.c.login(username=self.T_USER_DATA[1]['username'],
@@ -171,21 +160,7 @@ class IntegrationTestCase(TestCase):
             response.context['form'].initial['body'],
             format_quote(self.user_1, self.T_MESSAGE_DATA[0]['body'])
         )
-        self.assertEqual(
-            response.context['form'].initial['subject'],
-            u"Re: %(subject)s" % {'subject': self.T_MESSAGE_DATA[0]['subject']}
-        )
 
-
-class FormatTestCase(TestCase):
-    """ some tests for helper functions """
-    def testSubject(self):
-        """ test that reply counting works as expected """
-        self.assertEqual(format_subject(u"foo bar"), u"Re: foo bar")
-        self.assertEqual(format_subject(u"Re: foo bar"), u"Re[2]: foo bar")
-        self.assertEqual(format_subject(u"Re[2]: foo bar"), u"Re[3]: foo bar")
-        self.assertEqual(format_subject(u"Re[10]: foo bar"),
-                         u"Re[11]: foo bar")
 
 
 class InboxCountTestCase(TestCase):
@@ -201,7 +176,6 @@ class InboxCountTestCase(TestCase):
         )
         Message.objects.create(
             recipient=self.user_2,
-            subject="Subject",
             body="Body",
             sender=self.user
         )
@@ -253,7 +227,7 @@ class RecipientFilterTestCase(TestCase):
 
     def testRecipientFiterIsActive(self):
         form = ComposeForm(
-            {"recipient": "user1", "subject": "S", "body": "B"},
+            {"recipient": "user1", "body": "B"},
             recipient_filter=self.f
         )
         assert form.is_valid()
@@ -261,7 +235,7 @@ class RecipientFilterTestCase(TestCase):
 
     def testRecipientFilterNotActive(self):
         form = ComposeForm(
-            {"recipient": "user2", "subject": "S", "body": "B"},
+            {"recipient": "user2", "body": "B"},
             recipient_filter=self.f
         )
         assert not form.is_valid()
@@ -269,7 +243,7 @@ class RecipientFilterTestCase(TestCase):
 
     def testRecipientFilterMixed(self):
         form = ComposeForm(
-            {"recipient": "user1,user2", "subject": "S", "body": "B"},
+            {"recipient": "user1,user2", "body": "B"},
             recipient_filter=self.f
         )
         assert not form.is_valid()
