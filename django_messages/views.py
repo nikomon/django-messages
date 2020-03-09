@@ -36,7 +36,7 @@ def inbox(request, template_name='django_messages/inbox.html'):
     })
 
 @login_required
-def conversations(request, template_name='django_messages/inbox.html'):
+def conversations(request):
     """
     Displays a list of conversations for the current user.
     Optional Arguments:
