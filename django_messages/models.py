@@ -21,8 +21,10 @@ class MessageManager(models.Manager):
         """
         return self.filter(
             recipient=user,
-            sender=user,
             recipient_deleted_at__isnull=True,
+        ) | self.filter(
+            sender=user,
+            sender_deleted_at__isnull=True,
         )
 
     def outbox_for(self, user):
