@@ -31,7 +31,6 @@ def inbox(request, template_name='django_messages/inbox.html'):
         ``template_name``: name of the template to use.
     """
     message_list = Message.objects.inbox_for(request.user)
-    message_list.values('recipient', 'sender').distinct().values('recipient')
     return render(request, template_name, {
         'message_list': message_list.values('recipient', 'sender').distinct().values('recipient')
     })
@@ -44,11 +43,11 @@ def conversations(request, template_name='django_messages/inbox.html'):
         ``template_name``: name of the template to use.
     """
     message_list = Message.objects.conversations_for(request.user)
-    return render(request, template_name, {
-        'message_list': message_list,
-    })
-    # data = serializers.serialize('json', message_list.get_queryset())
-    # return HttpResponse(data, content_type="application/json")
+    # return render(request, template_name, {
+    #     'message_list': message_list,
+    # })
+    data = serializers.serialize('json', message_list)
+    return HttpResponse(data, content_type="application/json")
 
 
 @login_required
