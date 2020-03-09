@@ -14,7 +14,7 @@ from django.conf import settings
 from django_messages.models import Message
 from django_messages.forms import ComposeForm
 from django_messages.utils import format_quote, get_user_model, get_username_field
-from django.http import JsonResponse
+from django.core import serializers
 
 User = get_user_model()
 
@@ -43,7 +43,8 @@ def conversations(request, template_name='django_messages/inbox.html'):
         ``template_name``: name of the template to use.
     """
     message_list = Message.objects.conversations_for(request.user)
-    return JsonResponse({'message_list': message_list})
+    data = serializers.serialize('json', message_list.get_queryset())
+    return HttpResponse(data, content_type="application/json")
 
 
 @login_required
