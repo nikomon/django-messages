@@ -14,6 +14,7 @@ from django.conf import settings
 from django_messages.models import Message
 from django_messages.forms import ComposeForm
 from django_messages.utils import format_quote, get_user_model, get_username_field
+from django.http import HttpResponse
 
 User = get_user_model()
 
@@ -33,6 +34,17 @@ def inbox(request, template_name='django_messages/inbox.html'):
     return render(request, template_name, {
         'message_list': message_list,
     })
+
+@login_required
+def conversations(request, template_name='django_messages/inbox.html'):
+    """
+    Displays a list of conversations for the current user.
+    Optional Arguments:
+        ``template_name``: name of the template to use.
+    """
+    message_list = Message.objects.conversations_for(request.user)
+    return JsonResponse({'message_list': message_list})
+
 
 @login_required
 def outbox(request, template_name='django_messages/outbox.html'):

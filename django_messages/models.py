@@ -14,6 +14,19 @@ AUTH_USER_MODEL = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 class MessageManager(models.Manager):
 
+    def conversations_for(self, user):
+        """
+        Returns all conversations user has started or received by from different users and are not
+        marked as deleted.
+        """
+        return self.filter(
+            recipient=user,
+            recipient_deleted_at__isnull=True,
+        ) | self.filter(
+            sender=user,
+            sender_deleted_at__isnull=True,
+        ).values('recipient', 'sender').distinct()
+
     def inbox_for(self, user):
         """
         Returns all messages that were received by the given user and are not
