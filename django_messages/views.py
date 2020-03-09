@@ -45,7 +45,7 @@ def conversations(request):
     """
     message_list = Message.objects.conversations_for(request.user).values('recipient', 'sender').distinct()
 
-    data = serializers.serialize('json', message_list.values('recipient', 'sender').distinct())
+    data = serializers.serialize('json', message_list.only('recipient', 'sender').distinct())
     return HttpResponse(data, content_type="application/json")
 
 
