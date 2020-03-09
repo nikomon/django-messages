@@ -4,6 +4,7 @@ from django.utils.text import wrap
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.http import HttpResponse
 
 # favour django-mailer but fall back to django.core.mail
 
