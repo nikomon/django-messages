@@ -43,7 +43,7 @@ def conversations(request):
     Optional Arguments:
         ``template_name``: name of the template to use.
     """
-    message_list = Message.objects.conversations_for(request.user).only('recipient', 'sender').distinct()
+    message_list = Message.objects.conversations_for(request.user)
     print(message_list)
 
     data = serializers.serialize('json', message_list
