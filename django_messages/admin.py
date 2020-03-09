@@ -61,7 +61,7 @@ class MessageAdmin(admin.ModelAdmin):
     )
     list_display = ('sender', 'recipient', 'sent_at', 'read_at')
     list_filter = ('sent_at', 'sender', 'recipient')
-    search_fields = ('body')
+    search_fields = (['sender','body', 'recipient'])
     raw_id_fields = ('sender', 'recipient', 'parent_msg')
 
     def save_model(self, request, obj, form, change):
